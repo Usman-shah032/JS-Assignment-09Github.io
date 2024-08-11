@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In & Sign Up System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 300px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            margin-top: 0;
+            text-align: center;
+        }
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        p.error {
+            color: red;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        p.success {
+            color: green;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sign Up Form -->
+    <div class="container" id="signup-container">
+        <h2>Sign Up</h2>
+        <input type="text" id="signup-username" placeholder="Username" required>
+        <input type="email" id="signup-email" placeholder="Email" required>
+        <input type="password" id="signup-password" placeholder="Password" required>
+        <p id="signup-error" class="error hidden"></p>
+        <button onclick="register()">Sign Up</button>
+        <p>Already have an account? <a href="#" onclick="showLogin()">Sign In</a></p>
+    </div>
+
+    <!-- Sign In Form -->
+    <div class="container hidden" id="login-container">
+        <h2>Sign In</h2>
+        <input type="text" id="login-username" placeholder="Username or Email" required>
+        <input type="password" id="login-password" placeholder="Password" required>
+        <p id="login-error" class="error hidden"></p>
+        <button onclick="login()">Sign In</button>
+        <p>Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a></p>
+    </div>
+
+    <!-- OTP Verification Form -->
+    <div class="container hidden" id="otp-container">
+        <h2>OTP Verification</h2>
+        <p>An OTP has been sent to your email.</p>
+        <input type="number" id="otp-input" placeholder="Enter OTP" required>
+        <p id="otp-error" class="error hidden"></p>
+        <button onclick="verifyOTP()">Verify OTP</button>
+        <button id="resend-otp" class="hidden" onclick="resendOTP()">Resend OTP</button>
+    </div>
+
+    <script>
+        let users = [];
+        let generatedOTP = null;
+        let loggedInUser = null;
+
+        function showSignup() {
+            document.getElementById('signup-container').classList.remove('hidden');
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('otp-container').classList.add('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('signup-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('otp-container').classList.add('hidden');
+        }
+
+        function register() {
+            const username = document.getElementById('signup-username').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const errorElem = document.getElementById('signup-error');
+
+            if (!username || !email || !password) {
+                errorElem.textContent = 'All fields are required!';
+                errorElem.classList.remove('hidden');
+                return;
+            }
+
+            if (users.find(user => user.username === username || user.email === email)) {
+                errorElem.textContent = 'Username or Email already exists!';
+                errorElem.classList.remove('hidden');
+                return;
+            }
+
+            users.push({ username, email, password });
+            errorElem.classList.add('hidden');
+            alert('Registration successful! Please sign in.');
+            showLogin();
+        }
+
+        function login() {
+            const identifier = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const errorElem = document.getElementById('login-error');
+
+            loggedInUser = users.find(user => (user.username === identifier || user.email === identifier) && user.password === password);
+
+            if (!loggedInUser) {
+                errorElem.textContent = 'Incorrect username/email or password!';
+                errorElem.classList.remove('hidden');
+                return;
+            }
+
+            errorElem.classList.add('hidden');
+            sendOTP();
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('otp-container').classList.remove('hidden');
+        }
+
+        function sendOTP() {
+            generatedOTP = Math.floor(100000 + Math.random() * 900000);
+            alert(`OTP sent to your email: ${generatedOTP}`); // For demo purposes, showing OTP in an alert
+        }
+
+        function verifyOTP() {
+            const otpInput = document.getElementById('otp-input').value;
+            const errorElem = document.getElementById('otp-error');
+            const resendBtn = document.getElementById('resend-otp');
+
+            if (otpInput == generatedOTP) {
+                errorElem.classList.add('hidden');
+                resendBtn.classList.add('hidden');
+                alert(`Welcome, ${loggedInUser.username}!`);
+                document.getElementById('otp-container').classList.add('hidden');
+            } else {
+                errorElem.textContent = 'Incorrect OTP!';
+                errorElem.classList.remove('hidden');
+                resendBtn.classList.remove('hidden');
+            }
+        }
+
+        function resendOTP() {
+            sendOTP();
+            document.getElementById('otp-error').classList.add('hidden');
+            alert('A new OTP has been sent to your email.');
+        }
+    </script>
+
+</body>
+</html>
